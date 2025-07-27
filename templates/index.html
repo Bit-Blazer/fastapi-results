@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Results Portal</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="card glass-card">
+      <h1>🎓 Student Results Portal</h1>
+      <div class="search-form">
+        <form method="get" action="/" style="display: flex; gap: 1rem; flex: 1">
+          <input type="text" name="q" placeholder="🔍 Search by name or registration number..." value="{{ q }}" />
+          <button type="submit">Search</button>
+        </form>
+      </div>
+
+      {% if results %}
+      <h3>
+        {% if q %}Search Results{% else %}All Students{% endif %} ({{
+        results|length }} found)
+      </h3>
+      <ul class="student-list">
+        {% for r in results %}
+        <li class="student-item">
+          <a href="/{{ r.regno }}/" class="student-regno">{{ r.regno }}</a>
+          {% if r.name %}
+          <div class="student-name">{{ r.name }}</div>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="text-center">
+        <h3>No students found{% if q %} for "{{ q }}"{% endif %}</h3>
+        <p>Try a different search term or check the spelling.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+
+</html>

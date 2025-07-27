@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Authentication - Student Portal</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="card glass-card auth-form">
+      <h2 class="text-center">🔐 Student Authentication</h2>
+      <p class="text-center mb-4">
+        Enter your date of birth to access results for
+        <strong>{{ regno }} - {{ student_name}}</strong>
+      </p>
+
+      <form method="post">
+        <div class="mb-2">
+          <input type="text" name="dob" placeholder="📅 DD-MM-YYYY" required style="width: 100%" pattern="\d{2}-\d{2}-\d{4}"
+            title="Please enter date in DD-MM-YYYY format" />
+        </div>
+        <input type="submit" value="🚀 Access Results" style="width: 100%" />
+      </form>
+
+      {% if error %}
+      <div class="error mt-2">❌ {{ error }}. Please try again.</div>
+      {% endif %}
+
+      <div class="text-center mt-4">
+        <a href="/" class="back-link"> ⬅ Back to Search </a>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

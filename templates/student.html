@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Results for {{ regno }} - Student Portal</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <nav>
+      <a href="/">🏠 Home</a> &raquo;
+      <span>{{ regno }}</span>
+    </nav>
+
+    <div class="card glass-card">
+      <h2>📊 Academic Results</h2>
+
+      {% if student_name %}
+      <div class="student-info">
+        <strong>Student Name:</strong> {{ student_name }}<br />
+        <strong>Registration Number:</strong> {{ regno }}
+      </div>
+      {% endif %}
+
+      <a href="/zip/{{ regno }}" class="download-link">
+        📦 Download All PDFs (ZIP)
+      </a>
+
+      {% if files %} {% for file in files %}
+      <div class="pdf-viewer">
+        <div class="pdf-header">
+          📄 Semester {{ file.filename.split('_')[-1].replace('.pdf',
+          '').replace('sem', '') }} {% if file.gpa %}
+          <span style="float: right">GPA: {{ file.gpa }}</span>
+          {% endif %}
+        </div>
+        <iframe src="/pdf/{{ regno }}/{{ file.filename }}"></iframe>
+      </div>
+      {% endfor %} {% else %}
+      <div class="text-center">
+        <h3>No results found</h3>
+        <p>No PDF files are available for this student.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+
+</html>
