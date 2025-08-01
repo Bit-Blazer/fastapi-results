@@ -1,0 +1,29 @@
+# gitignore for a fastapi app
+# Byte-compiled / optimized / DLL files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+# Virtual environment
+venv/
+env/
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+# IDE files
+.vscode/
+.idea/
+*.swp
+# OS files
+.DS_Store
+Thumbs.db
+# Logs
+*.log
+# Test coverage
+htmlcov/
+.coverage
+.cache/
+# Environment variables
+.env
+.env.*
