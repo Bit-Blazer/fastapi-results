@@ -13,7 +13,6 @@ from starlette.middleware.sessions import SessionMiddleware
 import json
 from fastapi import Form
 from fastapi.responses import RedirectResponse
-from datetime import datetime
 
 app = FastAPI()
 app.add_middleware(
@@ -24,6 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = BASE_DIR / "results"
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+
+with open("subjects.json") as f:
+    subject_map = json.load(f)
 
 
 def extract_gpa(pdf_path: Path):
@@ -96,10 +98,6 @@ def auth_submit(regno: str, dob: str = Form(...), request: Request = None):
 
 @app.get("/")
 def index(request: Request, q: str = ""):
-
-    # print the time
-    print(f"Index accessed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
     q = q.lower()
     results = []
 
@@ -108,8 +106,6 @@ def index(request: Request, q: str = ""):
         if not q or q in regno.lower() or q in name:
             results.append({"regno": regno, "name": data.get("name", "")})
 
-    # print time
-    print(f"Filtered for query '{q}' at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     return templates.TemplateResponse(
         "index.html", {"request": request, "results": results, "q": q}
     )
@@ -128,10 +124,57 @@ def student_page(regno: str, request: Request):
     file_data = []
     student_name = students.get(regno, {}).get("name")
 
+    total_credits = 0
+    total_points = 0
+
+    grade_points = {
+        "O": 10,
+        "A+": 9,
+        "A": 8,
+        "B+": 7,
+        "B": 6,
+        "C": 5,
+        "U": 0,
+        "RA": 0,
+        "AB": 0,
+    }
+
+    subject_regex = re.compile(
+        r"(2[123][A-Z]{2,3}\d{2,3}[TL])\s*(?:-\s|\s)([A-Za-z,\s]+)\s(O|A\+?|B\+?|C|U|RA|AB)\s+[PRAW]*",
+        re.IGNORECASE,
+    )
+
+    # Process PDF files
     for f in files:
         sem = f.name.replace(f"{regno}_", "").replace(".pdf", "")
         gpa = extract_gpa(f)
         file_data.append({"filename": f.name, "sem": sem, "gpa": gpa})
+
+        try:
+            with fitz.open(f) as doc:
+                text = "\n".join(page.get_text() for page in doc)
+                matches = subject_regex.findall(text)
+
+                for code, _, grade in matches:
+                    code = code.strip().upper()
+                    grade = grade.strip().upper()
+
+                    credit_str = subject_map.get(code, {}).get("credits")
+
+                    credits = (
+                        int(credit_str) if credit_str and credit_str.isdigit() else 0
+                    )
+                    gp = grade_points.get(grade, 0)
+                    if gp == 0:
+                        continue
+
+                    total_credits += credits
+                    total_points += gp * credits
+
+        except Exception as e:
+            print(f"[ERROR CGPA] {f.name}: {e}")
+
+    overall_cgpa = round(total_points / total_credits, 3) if total_credits else None
 
     return templates.TemplateResponse(
         "student.html",
@@ -140,6 +183,7 @@ def student_page(regno: str, request: Request):
             "regno": regno,
             "files": file_data,
             "student_name": student_name,
+            "overall_cgpa": overall_cgpa,
         },
     )
 
