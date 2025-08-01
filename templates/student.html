@@ -21,7 +21,10 @@
       {% if student_name %}
       <div class="student-info">
         <strong>Student Name:</strong> {{ student_name }}<br />
-        <strong>Registration Number:</strong> {{ regno }}
+        <strong>Registration Number:</strong> {{ regno }} <br />
+        {% if overall_cgpa %}
+        <strong>📊 Overall CGPA: {{ overall_cgpa }}</strong>
+        {% endif %}
       </div>
       {% endif %}
 

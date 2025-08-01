@@ -1,0 +1,238 @@
+{
+    "21EN101T": {
+        "name": "COMMUNICATIVE\tENGLISH",
+        "credits": "2"
+    },
+    "21MA101T": {
+        "name": "MATRICES,\tDIFFERENTIAL\tAND\nINTEGRAL\tCALCULUS",
+        "credits": "4"
+    },
+    "21CH101T": {
+        "name": "ENGINEERING\tCHEMISTRY",
+        "credits": "3"
+    },
+    "21CS101T": {
+        "name": "PROGRAMMING\tFOR\tPROBLEM\nSOLVING\tIN\tC",
+        "credits": "3"
+    },
+    "21ME101T": {
+        "name": "ENGINEERING\tGRAPHICS",
+        "credits": "4"
+    },
+    "21EN102L": {
+        "name": "COMMUNICATIVE\tENGLISH\nLABORATORY",
+        "credits": "1"
+    },
+    "21CH102L": {
+        "name": "CHEMISTRY\tLABORATORY",
+        "credits": "1"
+    },
+    "21CS102L": {
+        "name": "C\tPROGRAMMING\tLABORATORY",
+        "credits": "2"
+    },
+    "21CS103T": {
+        "name": "PROGRAMMING\tFOR\tPROBLEM\nSOLVING\tUSING\tPYTHON",
+        "credits": "4"
+    },
+    "21CS104T": {
+        "name": "INTRODUCTION\tTO\tINFORMATION\tAND\nCOMPUTING\tTECHNOLOGY",
+        "credits": "3"
+    },
+    "21EE103T": {
+        "name": "BASIC\tELECTRICAL\tELECTRONICS\tAND\nCOMMUNICATION\tENGINEERING",
+        "credits": "3"
+    },
+    "21EE104L": {
+        "name": "BASIC\tELECTRICAL,\tELECTRONICS\nAND\tCOMMUNICATION\tENGINEERING\nLABORATORY",
+        "credits": "1"
+    },
+    "21EN103T": {
+        "name": "CONSTITUTION\tOF\tINDIA",
+        "credits": "0"
+    },
+    "21MA102T": {
+        "name": "VECTOR\tCALCULUS\tAND\tCOMPLEX\nFUNCTIONS",
+        "credits": "4"
+    },
+    "21ME104L": {
+        "name": "WORKSHOP\tPRACTICE",
+        "credits": "2"
+    },
+    "21PH101T": {
+        "name": "ENGINEERING\tPHYSICS",
+        "credits": "3"
+    },
+    "21PH102L": {
+        "name": "PHYSICS\tLABORATORY",
+        "credits": "1"
+    },
+    "21TP101L": {
+        "name": "QUANTITATIVE\tAPTITUDE\tAND\nVERBAL\tREASONING",
+        "credits": "1"
+    },
+    "21PH205T": {
+        "name": "FUNDAMENTALS\tOF\tNANO\tSCIENCE",
+        "credits": "0"
+    },
+    "21IT201T": {
+        "name": "OBJECT\tORIENTED\tPROGRAMMING",
+        "credits": "3"
+    },
+    "21CS201T": {
+        "name": "DATA\tSTRUCTURES",
+        "credits": "3"
+    },
+    "21CS202T": {
+        "name": "DIGITAL\tLOGIC\tCIRCUITS",
+        "credits": "4"
+    },
+    "21IT202T": {
+        "name": "COMPUTER\tARCHITECTURE",
+        "credits": "3"
+    },
+    "21MA201T": {
+        "name": "DISCRETE\tMATHEMATICS",
+        "credits": "4"
+    },
+    "23GE101T": {
+        "name": "HERITAGE\tOF\tTAMILS",
+        "credits": "1"
+    },
+    "21TP201L": {
+        "name": "QUANTITATIVE\tAPTITUDE\tAND\nBEHAVIOURAL\tSKILLS",
+        "credits": "1"
+    },
+    "21IT203L": {
+        "name": "OBJECT\tORIENTED\tPROGRAMMING\nLABORATORY",
+        "credits": "1"
+    },
+    "21CS203L": {
+        "name": "DATA\tSTRUCTURES\tLABORATORY",
+        "credits": "1"
+    },
+    "21CH201T": {
+        "name": "ENVIRONMENTAL\tSCIENCE\tAND\nENGINEERING",
+        "credits": "0"
+    },
+    "21CS204T": {
+        "name": "OPERATING\tSYSTEMS",
+        "credits": "3"
+    },
+    "21CS205T": {
+        "name": "DESIGN\tAND\tANALYSIS\tOF\nALGORITHMS",
+        "credits": "4"
+    },
+    "21IT204T": {
+        "name": "OBJECT\tORIENTED\tSOFTWARE\nENGINEERING",
+        "credits": "3"
+    },
+    "21IT205T": {
+        "name": "DATABASE\tMANAGEMENT\tSYSTEMS",
+        "credits": "3"
+    },
+    "21IT207T": {
+        "name": "JAVA\tPROGRAMMING",
+        "credits": "3"
+    },
+    "21MA205T": {
+        "name": "PROBABILITY\tAND\tQUEUEING\tTHEORY",
+        "credits": "4"
+    },
+    "23GE102T": {
+        "name": "TAMILS\tAND\tTECHNOLOGY",
+        "credits": "1"
+    },
+    "21TP202L": {
+        "name": "QUANTITATIVE\tAPTITUDE\tAND\nCOMMUNICATION\tSKILLS",
+        "credits": "1"
+    },
+    "21CS206L": {
+        "name": "OPERATING\tSYSTEM\tLABORATORY",
+        "credits": "1"
+    },
+    "21CS207L": {
+        "name": "PROGRAMMING\tIN\tJAVA\tLABORATORY",
+        "credits": "1"
+    },
+    "21IT208L": {
+        "name": "DATABASE\tMANAGEMENT\tSYSTEMS\nLABORATORY",
+        "credits": "1"
+    },
+    "21CS301T": {
+        "name": "INTERNET\tPROGRAMMING",
+        "credits": "3"
+    },
+    "21CS302T": {
+        "name": "THEORY\tOF\tCOMPUTATION",
+        "credits": "4"
+    },
+    "21CS303T": {
+        "name": "COMPUTER\tNETWORKS",
+        "credits": "3"
+    },
+    "21BA05T": {
+        "name": "PROFESSIONAL\tETHICS\tAND\tHUMAN\nVALUES",
+        "credits": "3"
+    },
+    "21OCE323T": {
+        "name": "GEOGRAPHIC\tINFORMATION\tSYSTEM",
+        "credits": "3"
+    },
+    "21CS314T": {
+        "name": "SOFT\tCOMPUTING",
+        "credits": "3"
+    },
+    "21TP301L": {
+        "name": "QUANTITATIVE\tAPTITUDE\tAND\tSOFT\nSKILLS",
+        "credits": "1"
+    },
+    "21CS304L": {
+        "name": "INTERNET\tPROGRAMMING\nLABORATORY",
+        "credits": "1"
+    },
+    "21CS305L": {
+        "name": "COMPUTER\tNETWORKS\tLABORATORY",
+        "credits": "1"
+    },
+    "21CS306T": {
+        "name": "Mobile Computing",
+        "credits": "3"
+    },
+    "21CS307T": {
+        "name": "Compiler Design",
+        "credits": "3"
+    },
+    "21CS308T": {
+        "name": "Artificial Intelligence",
+        "credits": "4"
+    },
+    "21CS309L": {
+        "name": "Mobile Application Development Laboratory",
+        "credits": "1"
+    },
+    "21CS310L": {
+        "name": "Compiler Design Laboratory",
+        "credits": "1"
+    },
+    "21CS311L": {
+        "name": "Internship",
+        "credits": "1"
+    },
+    "21CS312L": {
+        "name": "Mini Project",
+        "credits": "1"
+    },
+    "21MA301T": {
+        "name": "Resource Management Techniques",
+        "credits": "3"
+    },
+    "21OCE328T": {
+        "name": "Disaster Management",
+        "credits": "3"
+    },
+     "21CS317T": {
+        "name": "Software Project Management",
+        "credits": "3"
+    }
+}
