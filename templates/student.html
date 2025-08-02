@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Results for {{ regno }} - Student Portal</title>
+  <title>Results for {{ regno }}</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 
@@ -12,7 +12,7 @@
   <div class="container">
     <nav>
       <a href="/">🏠 Home</a> &raquo;
-      <span>{{ regno }}</span>
+      <span>{{ student_name }}</span>
     </nav>
 
     <div class="card glass-card">
@@ -22,8 +22,16 @@
       <div class="student-info">
         <strong>Student Name:</strong> {{ student_name }}<br />
         <strong>Registration Number:</strong> {{ regno }} <br />
-        {% if overall_cgpa %}
-        <strong>📊 Overall CGPA: {{ overall_cgpa }}</strong>
+
+        {% set stats = namespace(total_gp=0, total_credits=0) %}
+        {% for file in files %}
+        {% if file.total_credits and file.total_grade_points %}
+        {% set stats.total_gp = stats.total_gp + file.total_grade_points %}
+        {% set stats.total_credits = stats.total_credits + file.total_credits %}
+        {% endif %}
+        {% endfor %}
+        {% set overall_cgpa = "%.4f"|format(stats.total_gp / stats.total_credits) if stats.total_credits > 0 else "N/A" %} {% if overall_cgpa %}
+        <strong>📊 Overall CGPA: <span id="overall-cgpa">{{ overall_cgpa }}</span></strong>
         {% endif %}
       </div>
       {% endif %}
@@ -33,14 +41,76 @@
       </a>
 
       {% if files %} {% for file in files %}
-      <div class="pdf-viewer">
-        <div class="pdf-header">
-          📄 Semester {{ file.filename.split('_')[-1].replace('.pdf',
-          '').replace('sem', '') }} {% if file.gpa %}
-          <span style="float: right">GPA: {{ file.gpa }}</span>
+      <div class="semester-section">
+        <div class="semester-header">
+          📄 Semester {{ file.filename.split('_')[-1].replace('.pdf', '').replace('sem', '') }}
+          {% if file.gpa %}
+          <span class="semester-gpa">GPA: {{ file.gpa }}</span>
           {% endif %}
         </div>
-        <iframe src="/pdf/{{ regno }}/{{ file.filename }}"></iframe>
+        {% if file.subjects %}
+        <table class="subjects-table">
+          <thead>
+            <tr>
+              <th>Subject Code</th>
+              <th>Subject Name</th>
+              <th>Grade</th>
+              <th>Subject Credits</th>
+
+              <th>Grade Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for subject in file.subjects %}
+            <tr>
+              <td>{{ subject.code }}</td>
+              <td>{{ subject.name }}</td>
+              <td class="grade-cell">
+                <select class="grade-dropdown" data-subject-code="{{ subject.code }}" data-credits="{{ subject.credits }}"
+                  data-semester="{{ file.filename.split('_')[-1].replace('.pdf', '').replace('sem', '') }}">
+                  <option value="O" {% if subject.grade=='O' %}selected{% endif %}>O</option>
+                  <option value="A+" {% if subject.grade=='A+' %}selected{% endif %}>A+</option>
+                  <option value="A" {% if subject.grade=='A' %}selected{% endif %}>A</option>
+                  <option value="B+" {% if subject.grade=='B+' %}selected{% endif %}>B+</option>
+                  <option value="B" {% if subject.grade=='B' %}selected{% endif %}>B</option>
+                  <option value="C" {% if subject.grade=='C' %}selected{% endif %}>C</option>
+                  <option value="U" {% if subject.grade=='U' %}selected{% endif %}>U</option>
+                  <option value="AB" {% if subject.grade=='AB' %}selected{% endif %}>AB</option>
+                  <option value="NA" {% if subject.grade=='NA' %}selected{% endif %}>NA</option>
+                </select>
+              </td>
+              <td class="text-center">{{ subject.credits }}</td>
+
+              <td class="text-center grade-points-cell" data-subject-code="{{ subject.code }}">{{ subject.grade_points_earned }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="semester-summary">
+          <div class="summary-item">
+            <strong>Total Grade Points:</strong> <span class="total-grade-points"
+              data-semester="{{ file.filename.split('_')[-1].replace('.pdf', '').replace('sem', '') }}">{{ file.total_grade_points }}</span>
+          </div>
+          <div class="summary-item">
+            <strong>Total Credits:</strong> <span class="total-credits"
+              data-semester="{{ file.filename.split('_')[-1].replace('.pdf', '').replace('sem', '') }}">{{ file.total_credits }}</span>
+          </div>
+          <div class="summary-item">
+            <strong>GPA:</strong>
+            <span class="semester-gpa-value" data-semester="{{ file.filename.split('_')[-1].replace('.pdf', '').replace('sem', '') }}">
+              {% if file.total_credits > 0 %}
+              {{ "%.2f"|format(file.total_grade_points / file.total_credits) }}
+              {% else %}
+              N/A
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        {% else %}
+        <div style="padding: 1rem; text-align: center; color: #666">
+          No subject data could be extracted from this semester's PDF.
+        </div>
+        {% endif %}
       </div>
       {% endfor %} {% else %}
       <div class="text-center">
@@ -50,6 +120,108 @@
       {% endif %}
     </div>
   </div>
+
+  <script>
+    // Grade points mapping
+    const gradePoints = {
+      'O': 10,
+      'A+': 9,
+      'A': 8,
+      'B+': 7,
+      'B': 6,
+      'C': 5,
+      'U': 0,
+      'AB': 0,
+      'NA': 0
+    };
+
+    // Function to calculate grade points for a subject
+    function calculateGradePoints(grade, credits) {
+      return gradePoints[grade] * credits;
+    }
+
+    // Function to update semester calculations
+    function updateSemesterCalculations(semester) {
+      const gradeDropdowns = document.querySelectorAll(`select[data-semester="${semester}"]`);
+      let totalGradePoints = 0;
+      let totalCredits = 0;
+
+      gradeDropdowns.forEach(dropdown => {
+        const grade = dropdown.value;
+        const credits = parseInt(dropdown.dataset.credits);
+        const subjectCode = dropdown.dataset.subjectCode;
+
+        // Calculate new grade points
+        const gradePointsEarned = calculateGradePoints(grade, credits);
+
+        // Update the grade points cell
+        const gradePointsCell = document.querySelector(`td[data-subject-code="${subjectCode}"]`);
+        if (gradePointsCell) {
+          gradePointsCell.textContent = gradePointsEarned;
+        }
+
+        // Add to totals
+        totalGradePoints += gradePointsEarned;
+        totalCredits += credits;
+      });
+
+      // Update semester summary
+      const totalGradePointsElement = document.querySelector(`.total-grade-points[data-semester="${semester}"]`);
+      const totalCreditsElement = document.querySelector(`.total-credits[data-semester="${semester}"]`);
+      const semesterGpaElement = document.querySelector(`.semester-gpa-value[data-semester="${semester}"]`);
+
+      if (totalGradePointsElement) totalGradePointsElement.textContent = totalGradePoints;
+      if (totalCreditsElement) totalCreditsElement.textContent = totalCredits;
+      if (semesterGpaElement) {
+        const gpa = totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : 'N/A';
+        semesterGpaElement.textContent = gpa;
+      }
+
+      // Update overall CGPA
+      updateOverallCGPA();
+    }
+
+    // Function to update overall CGPA
+    function updateOverallCGPA() {
+      const allGradePointsElements = document.querySelectorAll('.total-grade-points');
+      const allCreditsElements = document.querySelectorAll('.total-credits');
+
+      let overallTotalGradePoints = 0;
+      let overallTotalCredits = 0;
+
+      allGradePointsElements.forEach(element => {
+        overallTotalGradePoints += parseInt(element.textContent) || 0;
+      });
+
+      allCreditsElements.forEach(element => {
+        overallTotalCredits += parseInt(element.textContent) || 0;
+      });
+
+      const overallCgpaElement = document.getElementById('overall-cgpa');
+      if (overallCgpaElement && overallTotalCredits > 0) {
+        const cgpa = (overallTotalGradePoints / overallTotalCredits).toFixed(4);
+        overallCgpaElement.textContent = cgpa;
+      }
+    }
+
+    // Add event listeners to all grade dropdowns
+    document.addEventListener('DOMContentLoaded', function () {
+      const gradeDropdowns = document.querySelectorAll('.grade-dropdown');
+
+      gradeDropdowns.forEach(dropdown => {
+        dropdown.addEventListener('change', function () {
+          const semester = this.dataset.semester;
+          updateSemesterCalculations(semester);
+
+          // Update dropdown styling based on grade
+          this.className = `grade-dropdown grade-${this.value.replace('+', '-plus')}`;
+        });
+
+        // Set initial styling
+        dropdown.className = `grade-dropdown grade-${dropdown.value.replace('+', '-plus')}`;
+      });
+    });
+  </script>
 </body>
 
 </html>
