@@ -7,7 +7,6 @@ from pathlib import Path
 import zipfile
 import fitz  # PyMuPDF
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.responses import Response
 
 from starlette.middleware.sessions import SessionMiddleware
 import json
@@ -24,8 +23,11 @@ RESULTS_DIR = BASE_DIR / "results"
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
-with open("subjects.json") as f:
+with open(BASE_DIR / "subjects.json") as f:
     subject_map = json.load(f)
+
+with open(BASE_DIR / "students.json") as f:
+    students = json.load(f)
 
 
 def extract_gpa(pdf_path: Path):
@@ -55,10 +57,6 @@ def extract_name(pdf_path: Path):
     except Exception:
         return None
     return None
-
-
-with open(BASE_DIR / "students.json") as f:
-    students = json.load(f)
 
 
 @app.get("/auth/{regno}")
@@ -121,11 +119,8 @@ def student_page(regno: str, request: Request):
         raise HTTPException(status_code=404, detail="Student not found")
 
     files = sorted([f for f in student_folder.glob(f"{regno}_*.pdf")])
-    file_data = []
+    file_data = {}
     student_name = students.get(regno, {}).get("name")
-
-    total_credits = 0
-    total_points = 0
 
     grade_points = {
         "O": 10,
@@ -137,10 +132,11 @@ def student_page(regno: str, request: Request):
         "U": 0,
         "RA": 0,
         "AB": 0,
+        "NA": 0,
     }
 
     subject_regex = re.compile(
-        r"(2[123][A-Z]{2,3}\d{2,3}[TL])\s*(?:-\s|\s)([A-Za-z,\s]+)\s(O|A\+?|B\+?|C|U|RA|AB)\s+[PRAW]*",
+        r"(\d)\s*(2[123][A-Z]{2,3}\d{2,3}[TL])\s*(?:-\s|\s)([A-Za-z,\s]+)\s(A\+?|B\+?|C|O|U|AB|NA)\s",
         re.IGNORECASE,
     )
 
@@ -148,42 +144,90 @@ def student_page(regno: str, request: Request):
     for f in files:
         sem = f.name.replace(f"{regno}_", "").replace(".pdf", "")
         gpa = extract_gpa(f)
-        file_data.append({"filename": f.name, "sem": sem, "gpa": gpa})
-
         try:
             with fitz.open(f) as doc:
                 text = "\n".join(page.get_text() for page in doc)
                 matches = subject_regex.findall(text)
 
-                for code, _, grade in matches:
+                for subject_sem, code, name, grade in matches:
+                    subject_sem = subject_sem.strip()
                     code = code.strip().upper()
+                    name = name.strip().title()
                     grade = grade.strip().upper()
 
-                    credit_str = subject_map.get(code, {}).get("credits")
+                    # Get subject name from subject map if available
+                    subject_info = subject_map.get(code, {})
+                    subject_name = subject_info.get("name", name) or name
+                    credits = subject_info.get("credits")
 
-                    credits = (
-                        int(credit_str) if credit_str and credit_str.isdigit() else 0
-                    )
-                    gp = grade_points.get(grade, 0)
-                    if gp == 0:
-                        continue
+                    # Calculate grade points earned (credits × grade point value)
+                    gp = grade_points.get(grade)
+                    grade_points_earned = credits * gp
 
-                    total_credits += credits
-                    total_points += gp * credits
+                    subject_data = {
+                        "code": code,
+                        "name": subject_name,
+                        "grade": grade,
+                        "credits": credits,
+                        "grade_points_earned": grade_points_earned,
+                    }
+
+                    # Check if subject semester matches PDF semester
+                    if subject_sem == sem:
+                        # Normal case - subject belongs to this semester
+                        file_data[sem]["subjects"].append(subject_data)
+                        file_data[sem]["total_credits"] += credits
+                        file_data[sem]["total_grade_points"] += grade_points_earned
+                    else:
+                        # Arrear case - subject is from a different semester
+                        # Check if we have data for the original semester
+                        if subject_sem in file_data:
+                            # Remove any existing entry for this subject in the original semester
+                            original_subjects = file_data[subject_sem]["subjects"]
+                            for i, existing_subject in enumerate(original_subjects):
+                                if existing_subject["code"] == code:
+                                    # Remove old data
+                                    file_data[subject_sem][
+                                        "total_credits"
+                                    ] -= existing_subject["credits"]
+                                    file_data[subject_sem][
+                                        "total_grade_points"
+                                    ] -= existing_subject["grade_points_earned"]
+                                    original_subjects.pop(i)
+                                    break
+
+                            # Add updated data to the original semester
+                            file_data[subject_sem]["subjects"].append(subject_data)
+                            file_data[subject_sem]["total_credits"] += credits
+                            file_data[subject_sem][
+                                "total_grade_points"
+                            ] += grade_points_earned
+                        else:
+                            # Original semester doesn't exist yet, create it
+                            file_data[subject_sem] = {
+                                "filename": f"{regno}_{subject_sem}.pdf",
+                                "sem": subject_sem,
+                                "gpa": gpa,
+                                "subjects": [subject_data],
+                                "total_grade_points": grade_points_earned,
+                                "total_credits": credits,
+                            }
 
         except Exception as e:
-            print(f"[ERROR CGPA] {f.name}: {e}")
+            print(f"[ERROR Processing] {f.name}: {e}")
 
-    overall_cgpa = round(total_points / total_credits, 3) if total_credits else None
+    # Convert back to list format for template compatibility
+    file_data_list = []
+    for sem in sorted(file_data.keys()):
+        file_data_list.append(file_data[sem])
 
     return templates.TemplateResponse(
         "student.html",
         {
             "request": request,
             "regno": regno,
-            "files": file_data,
+            "files": file_data_list,
             "student_name": student_name,
-            "overall_cgpa": overall_cgpa,
         },
     )
 
@@ -208,8 +252,17 @@ def zip_and_download_all(regno: str):
         for f in student_folder.glob(f"{regno}_*.pdf"):
             zipf.write(f, arcname=f.name)
 
+    def cleanup_file():
+        try:
+            zip_path.unlink(missing_ok=True)
+        except Exception:
+            pass
+
     return FileResponse(
-        zip_path, media_type="application/zip", filename=f"{regno}_results.zip"
+        zip_path,
+        media_type="application/zip",
+        filename=f"{regno}_results.zip",
+        background=cleanup_file,
     )
 
 
