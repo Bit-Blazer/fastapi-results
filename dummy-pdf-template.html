@@ -1,37 +1,66 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 30px; }
-    h2 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: left;
+    }
   </style>
 </head>
+
 <body>
   <h2>VELAMMAL ENGINEERING COLLEGE</h2>
+  <p style="text-align: center">
+    <strong>Provisional Results for {{ exam_period }} Examinations</strong>
+  </p>
+
   <p><strong>Register Number :</strong> {{ reg_no }}</p>
   <p><strong>Name :</strong> {{ name }}</p>
   <p><strong>D.O.B :</strong> {{ dob }}</p>
 
   <table>
     <thead>
-      <tr><th>S.No</th><th>Semester</th><th>Subject Code with Name</th><th>Grade</th></tr>
+      <tr>
+        <th>S.No</th>
+        <th>Semester</th>
+        <th>Subject Code with Name</th>
+        <th>Grade</th>
+      </tr>
     </thead>
     <tbody>
       {% for subject in subjects %}
-<tr>
-  <td>{{ loop.index }}</td>  {# starts from 1 #}
-  <td>1</td>
-  <td>{{ subject.code }} - {{ subject.name }}</td>
-  <td>NA</td>
-</tr>
-{% endfor %}
-
+      <tr>
+        <td>{{ loop.index }}</td>
+        {# starts from 1 #}
+        <td>{{semester}}</td>
+        <td>{{ subject.code }} - {{ subject.name }}</td>
+        <td>NA</td>
+      </tr>
+      {% endfor %}
     </tbody>
   </table>
 
-  <p><strong>GPA for the Semester : 01 => -</strong></p>
+  <p><strong>GPA for the Semester : {{semester}} => -</strong></p>
 </body>
+
 </html>
