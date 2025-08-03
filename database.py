@@ -6,12 +6,14 @@ from sqlalchemy import (
     String,
     DECIMAL,
     ForeignKey,
+    DateTime,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from pathlib import Path
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
@@ -90,6 +92,23 @@ class Grade(Base):
     # Relationships
     semester = relationship("Semester", back_populates="grades")
     subject = relationship("Subject", back_populates="grades")
+
+
+class GradeChange(Base):
+    __tablename__ = "grade_changes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    regno = Column(String(20), nullable=False, index=True)
+    subject_code = Column(String(20), nullable=False)
+    semester = Column(Integer, nullable=False)
+    original_grade = Column(String(5), nullable=False)
+    new_grade = Column(String(5), nullable=False)
+    credits = Column(Integer, nullable=False)
+    changed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Optional: Add user tracking if you have user authentication
+    # user_ip = Column(String(45))  # For IPv4/IPv6 addresses
+    # user_agent = Column(String(500))  # Browser info
 
 
 # Database functions

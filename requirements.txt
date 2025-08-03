@@ -1,7 +1,8 @@
 fastapi
 uvicorn
 jinja2
-starlette
+starlette[full]
 python-dotenv
 supabase
 sqlalchemy
+psycopg2

@@ -204,17 +204,123 @@
       }
     }
 
+    // Function to save grade change to database
+    async function saveGradeChange(regno, subjectCode, semester, originalGrade, newGrade, credits) {
+      try {
+        const response = await fetch('/api/save-grade-change', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            regno: regno,
+            subject_code: subjectCode,
+            semester: semester,
+            original_grade: originalGrade,
+            new_grade: newGrade,
+            credits: credits,
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Grade change saved successfully:', result);
+
+          // Show a subtle success indicator
+          showNotification('Grade change saved successfully ✅', 'success');
+        } else {
+          console.error('Failed to save grade change:', response.statusText);
+          showNotification('Failed to save grade change ❌', 'error');
+        }
+      } catch (error) {
+        console.error('Error saving grade change:', error);
+        showNotification('Error saving grade change ❌', 'error');
+      }
+    }
+
+    // Function to show notifications
+    function showNotification(message, type) {
+      // Remove existing notification if any
+      const existingNotification = document.querySelector('.grade-notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `grade-notification ${type}`;
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#48bb78' : '#e53e3e'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        font-weight: 500;
+        animation: slideIn 0.3s ease-out;
+      `;
+
+      // Add CSS animation
+      if (!document.querySelector('#notification-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'notification-styles';
+        styles.textContent = `
+          @keyframes slideIn {
+            from {
+              transform: translateX(100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateX(0);
+              opacity: 1;
+            }
+          }
+        `;
+        document.head.appendChild(styles);
+      }
+
+      document.body.appendChild(notification);
+
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
     // Add event listeners to all grade dropdowns
     document.addEventListener('DOMContentLoaded', function () {
       const gradeDropdowns = document.querySelectorAll('.grade-dropdown');
+      const regno = '{{ regno }}'; // Get registration number from template
 
       gradeDropdowns.forEach(dropdown => {
+        // Store original grade for tracking changes
+        dropdown.dataset.originalGrade = dropdown.value;
+
         dropdown.addEventListener('change', function () {
           const semester = this.dataset.semester;
+          const subjectCode = this.dataset.subjectCode;
+          const credits = parseInt(this.dataset.credits);
+          const originalGrade = this.dataset.originalGrade;
+          const newGrade = this.value;
+
+          // Update calculations
           updateSemesterCalculations(semester);
 
           // Update dropdown styling based on grade
           this.className = `grade-dropdown grade-${this.value.replace('+', '-plus')}`;
+
+          // Save grade change to database if it's different from original
+          if (originalGrade !== newGrade) {
+            saveGradeChange(regno, subjectCode, semester, originalGrade, newGrade, credits);
+
+            // Update the original grade to the new one for future comparisons
+            this.dataset.originalGrade = newGrade;
+          }
         });
 
         // Set initial styling
