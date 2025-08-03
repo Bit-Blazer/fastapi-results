@@ -1,0 +1,362 @@
+{
+    "21EN101T": {
+        "name": "COMMUNICATIVE ENGLISH",
+        "credits": 2,
+        "semester": 1
+    },
+    "21MA101T": {
+        "name": "MATRICES, DIFFERENTIAL AND INTEGRAL CALCULUS",
+        "credits": 4,
+        "semester": 1
+    },
+    "21CH101T": {
+        "name": "ENGINEERING CHEMISTRY",
+        "credits": 3,
+        "semester": 1
+    },
+    "21CS101T": {
+        "name": "PROGRAMMING FOR PROBLEM SOLVING IN C",
+        "credits": 3,
+        "semester": 1
+    },
+    "21ME101T": {
+        "name": "ENGINEERING GRAPHICS",
+        "credits": 4,
+        "semester": 1
+    },
+    "21EN102L": {
+        "name": "COMMUNICATIVE ENGLISH LABORATORY",
+        "credits": 1,
+        "semester": 1
+    },
+    "21CH102L": {
+        "name": "CHEMISTRY LABORATORY",
+        "credits": 1,
+        "semester": 1
+    },
+    "21CS102L": {
+        "name": "C PROGRAMMING LABORATORY",
+        "credits": 2,
+        "semester": 1
+    },
+    "21CS103T": {
+        "name": "PROGRAMMING FOR PROBLEM SOLVING USING PYTHON",
+        "credits": 4,
+        "semester": 2
+    },
+    "21CS104T": {
+        "name": "INTRODUCTION TO INFORMATION AND COMPUTING TECHNOLOGY",
+        "credits": 3,
+        "semester": 2
+    },
+    "21EE103T": {
+        "name": "BASIC ELECTRICAL ELECTRONICS AND COMMUNICATION ENGINEERING",
+        "credits": 3,
+        "semester": 2
+    },
+    "21EE104L": {
+        "name": "BASIC ELECTRICAL, ELECTRONICS AND COMMUNICATION ENGINEERING LABORATORY",
+        "credits": 1,
+        "semester": 2
+    },
+    "21EN103T": {
+        "name": "CONSTITUTION OF INDIA",
+        "credits": 0,
+        "semester": 2
+    },
+    "21MA102T": {
+        "name": "VECTOR CALCULUS AND COMPLEX FUNCTIONS",
+        "credits": 4,
+        "semester": 2
+    },
+    "21ME104L": {
+        "name": "WORKSHOP PRACTICE",
+        "credits": 2,
+        "semester": 2
+    },
+    "21PH101T": {
+        "name": "ENGINEERING PHYSICS",
+        "credits": 3,
+        "semester": 2
+    },
+    "21PH102L": {
+        "name": "PHYSICS LABORATORY",
+        "credits": 1,
+        "semester": 2
+    },
+    "21TP101L": {
+        "name": "QUANTITATIVE APTITUDE AND VERBAL REASONING",
+        "credits": 1,
+        "semester": 2
+    },
+    "21PH205T": {
+        "name": "FUNDAMENTALS OF NANO SCIENCE",
+        "credits": 0,
+        "semester": 3
+    },
+    "21IT201T": {
+        "name": "OBJECT ORIENTED PROGRAMMING",
+        "credits": 3,
+        "semester": 3
+    },
+    "21CS201T": {
+        "name": "DATA STRUCTURES",
+        "credits": 3,
+        "semester": 3
+    },
+    "21CS202T": {
+        "name": "DIGITAL LOGIC CIRCUITS",
+        "credits": 4,
+        "semester": 3
+    },
+    "21IT202T": {
+        "name": "COMPUTER ARCHITECTURE",
+        "credits": 3,
+        "semester": 3
+    },
+    "21MA201T": {
+        "name": "DISCRETE MATHEMATICS",
+        "credits": 4,
+        "semester": 3
+    },
+    "23GE101T": {
+        "name": "HERITAGE OF TAMILS",
+        "credits": 1,
+        "semester": 3
+    },
+    "21TP201L": {
+        "name": "QUANTITATIVE APTITUDE AND BEHAVIOURAL SKILLS",
+        "credits": 1,
+        "semester": 3
+    },
+    "21IT203L": {
+        "name": "OBJECT ORIENTED PROGRAMMING LABORATORY",
+        "credits": 1,
+        "semester": 3
+    },
+    "21CS203L": {
+        "name": "DATA STRUCTURES LABORATORY",
+        "credits": 1,
+        "semester": 3
+    },
+    "21CH201T": {
+        "name": "ENVIRONMENTAL SCIENCE AND ENGINEERING",
+        "credits": 0,
+        "semester": 4
+    },
+    "21CS204T": {
+        "name": "OPERATING SYSTEMS",
+        "credits": 3,
+        "semester": 4
+    },
+    "21CS205T": {
+        "name": "DESIGN AND ANALYSIS OF ALGORITHMS",
+        "credits": 4,
+        "semester": 4
+    },
+    "21IT204T": {
+        "name": "OBJECT ORIENTED SOFTWARE ENGINEERING",
+        "credits": 3,
+        "semester": 4
+    },
+    "21IT205T": {
+        "name": "DATABASE MANAGEMENT SYSTEMS",
+        "credits": 3,
+        "semester": 4
+    },
+    "21IT207T": {
+        "name": "JAVA PROGRAMMING",
+        "credits": 3,
+        "semester": 4
+    },
+    "21MA205T": {
+        "name": "PROBABILITY AND QUEUEING THEORY",
+        "credits": 4,
+        "semester": 4
+    },
+    "23GE102T": {
+        "name": "TAMILS AND TECHNOLOGY",
+        "credits": 1,
+        "semester": 4
+    },
+    "21TP202L": {
+        "name": "QUANTITATIVE APTITUDE AND COMMUNICATION SKILLS",
+        "credits": 1,
+        "semester": 4
+    },
+    "21CS206L": {
+        "name": "OPERATING SYSTEM LABORATORY",
+        "credits": 1,
+        "semester": 4
+    },
+    "21CS207L": {
+        "name": "PROGRAMMING IN JAVA LABORATORY",
+        "credits": 1,
+        "semester": 4
+    },
+    "21IT208L": {
+        "name": "DATABASE MANAGEMENT SYSTEMS LABORATORY",
+        "credits": 1,
+        "semester": 4
+    },
+    "21CS301T": {
+        "name": "INTERNET PROGRAMMING",
+        "credits": 3,
+        "semester": 5
+    },
+    "21CS302T": {
+        "name": "THEORY OF COMPUTATION",
+        "credits": 4,
+        "semester": 5
+    },
+    "21CS303T": {
+        "name": "COMPUTER NETWORKS",
+        "credits": 3,
+        "semester": 5
+    },
+    "21BA05T": {
+        "name": "PROFESSIONAL ETHICS AND HUMAN VALUES",
+        "credits": 3,
+        "semester": 5
+    },
+    "21OCE323T": {
+        "name": "GEOGRAPHIC INFORMATION SYSTEM",
+        "credits": 3,
+        "semester": 5
+    },
+    "21CS314T": {
+        "name": "SOFT COMPUTING",
+        "credits": 3,
+        "semester": 5
+    },
+    "21CS313T": {
+        "name": "Computer Graphics and Multimedia",
+        "credits": 3,
+        "semester": 5
+    },
+    "21TP301L": {
+        "name": "QUANTITATIVE APTITUDE AND SOFT SKILLS",
+        "credits": 1,
+        "semester": 5
+    },
+    "21CS304L": {
+        "name": "INTERNET PROGRAMMING LABORATORY",
+        "credits": 1,
+        "semester": 5
+    },
+    "21CS305L": {
+        "name": "COMPUTER NETWORKS LABORATORY",
+        "credits": 1,
+        "semester": 5
+    },
+    "21CS306T": {
+        "name": "Mobile Computing",
+        "credits": 3,
+        "semester": 6
+    },
+    "21CS307T": {
+        "name": "Compiler Design",
+        "credits": 3,
+        "semester": 6
+    },
+    "21CS308T": {
+        "name": "Artificial Intelligence",
+        "credits": 4,
+        "semester": 6
+    },
+    "21CS309L": {
+        "name": "Mobile Application Development Laboratory",
+        "credits": 1,
+        "semester": 6
+    },
+    "21CS310L": {
+        "name": "Compiler Design Laboratory",
+        "credits": 1,
+        "semester": 6
+    },
+    "21CS311L": {
+        "name": "Internship",
+        "credits": 1,
+        "semester": 6
+    },
+    "21CS312L": {
+        "name": "Mini Project",
+        "credits": 1,
+        "semester": 6
+    },
+    "21MA301T": {
+        "name": "Resource Management Techniques",
+        "credits": 3,
+        "semester": 6
+    },
+    "21OCE328T": {
+        "name": "Disaster Management",
+        "credits": 3,
+        "semester": 6
+    },
+    "21CS317T": {
+        "name": "Software Project Management",
+        "credits": 3,
+        "semester": 6
+    },
+    "21CSA01T": {
+        "name": "Exploratory Data Analysis",
+        "credits": 3,
+        "semester": 5
+    },
+    "21CSA03T": {
+        "name": "Big Data and Big Data Analytics",
+        "credits": 3,
+        "semester": 5
+    },
+    "21ADA02T": {
+        "name": "Neural Networks and Deep Learning",
+        "credits": 3,
+        "semester": 6
+    },
+    "21CSA04T": {
+        "name": "Fundamentals of Business Analytics",
+        "credits": 3,
+        "semester": 6
+    },
+    "21CS401T": {
+        "name": "Cryptography and Network Security",
+        "credits": 3,
+        "semester": 7
+    },
+    "21CS402T": {
+        "name": "Data Science Using Python",
+        "credits": 3,
+        "semester": 7
+    },
+    "21IT402T": {
+        "name": "Cloud Computing and Virtualization",
+        "credits": 3,
+        "semester": 7
+    },
+    "21CS410T": {
+        "name": "Full Stack Programming",
+        "credits": 3,
+        "semester": 7
+    },
+    "21CS408T": {
+        "name": "Software Testing",
+        "credits": 3,
+        "semester": 7
+    },
+    "21CS403L": {
+        "name": "Cloud and Security Laboratory",
+        "credits": 2,
+        "semester": 7
+    },
+    "21CS404L": {
+        "name": "Data Science using Python Laboratory",
+        "credits": 2,
+        "semester": 7
+    },
+    "21OCE421T": {
+        "name": "Solid Waste Management",
+        "credits": 3,
+        "semester": 7
+    }
+}
