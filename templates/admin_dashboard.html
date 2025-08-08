@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grade Changes Monitor - Admin Panel</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+
+  <body>
+    <div class="admin-panel">
+      <!-- Navigation header -->
+      <div class="admin-header">
+        <div class="admin-header-left">
+          <h1>🛡️ Admin Panel</h1>
+        </div>
+        <form method="post" action="/admin/logout/" class="admin-logout-form">
+          <button type="submit" class="admin-logout-btn">🚪 Logout</button>
+        </form>
+      </div>
+      <div class="card glass-card">
+        <h1>📊 Grade Changes Monitor</h1>
+
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-number" id="totalChanges">-</div>
+            <div class="stat-label">Total Changes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="todayChanges">-</div>
+            <div class="stat-label">Today's Changes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="activeStudents">-</div>
+            <div class="stat-label">Students with Changes</div>
+          </div>
+        </div>
+
+        <div class="search-section">
+          <h3>Search Grade Changes</h3>
+          <form onsubmit="event.preventDefault(); search();">
+            <input
+              type="text"
+              id="regnoSearch"
+              placeholder="🔍 Enter registration number..."
+              autofocus
+            />
+            <button type="submit">Search</button>
+          </form>
+        </div>
+
+        <div id="loadingMessage" class="loading-centered hidden">
+          Loading grade changes...
+        </div>
+
+        <div id="errorMessage" class="error-message hidden"></div>
+
+        <div id="changesContainer">
+          <div id="changesCount" class="changes-count"></div>
+          <table class="changes-table hidden" id="changesTable">
+            <thead>
+              <tr>
+                <th>Reg No</th>
+                <th>Student Name</th>
+                <th>Subject</th>
+                <th>Semester</th>
+                <th>Grade Change</th>
+                <th>Credits</th>
+                <th>Changed At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="changesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentData = [];
+
+      // Load all grade changes on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        refreshData();
+      });
+
+      // Function to search by registration number
+      async function search() {
+        const regno = document.getElementById("regnoSearch").value.trim();
+
+        try {
+          showLoading(true);
+          hideError();
+
+          const response = await fetch(`/api/grade-changes/${regno}`);
+          const data = await response.json();
+
+          if (data.success) {
+            currentData = data.changes;
+            displayChanges(data);
+            updateStats(data);
+            // Update count for search results
+            document.getElementById(
+              "changesCount"
+            ).textContent = `Showing ${data.total_changes} change(s)`;
+          } else {
+            showError("Failed to load student grade changes: " + data.message);
+          }
+        } catch (error) {
+          showError("Error searching grade changes: " + error.message);
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // Function to display changes in table
+      function displayChanges(data) {
+        const tableBody = document.getElementById("changesTableBody");
+        const table = document.getElementById("changesTable");
+        const countDiv = document.getElementById("changesCount");
+
+        // Clear existing data
+        tableBody.innerHTML = "";
+
+        if (currentData.length === 0) {
+          countDiv.textContent = "No grade changes found";
+          table.classList.add("hidden");
+          return;
+        }
+
+        // Show table
+        table.classList.remove("hidden");
+
+        // Set count message
+        if (data.student_name) {
+          countDiv.textContent = `Showing ${currentData.length} change(s) for ${data.student_name}`;
+        } else {
+          countDiv.textContent = `Showing ${currentData.length} of ${data.total_changes} total changes`;
+        } // Populate table
+        currentData.forEach((change) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+          <td>${change.regno}</td>
+          <td>${change.student_name || "N/A"}</td>
+          <td>${change.subject_code}</td>
+          <td>${change.semester}</td>
+          <td><span class="grade-change">${change.grade_difference}</span></td>
+          <td>${change.credits}</td>
+          <td><div class="timestamp">${formatDate(change.changed_at)}</div></td>
+          <td>
+            <button class="delete-btn" onclick="deleteGradeChange(${
+              change.id
+            })" title="Delete this grade change">
+              ❌
+            </button>
+          </td>
+        `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      // Function to update statistics
+      function updateStats(data) {
+        // Handle total changes - use API data if available, otherwise current data length
+        const totalChanges = data.total_changes || currentData.length;
+        document.getElementById("totalChanges").textContent = totalChanges;
+
+        // Calculate today's changes
+        const today = new Date().toDateString();
+        const todayChanges = currentData.filter(
+          (change) => new Date(change.changed_at).toDateString() === today
+        ).length;
+        document.getElementById("todayChanges").textContent = todayChanges;
+
+        // Calculate unique students
+        const uniqueStudents = new Set(
+          currentData.map((change) => change.regno)
+        ).size;
+        document.getElementById("activeStudents").textContent = uniqueStudents;
+      }
+
+      // Function to delete a grade change
+      async function deleteGradeChange(changeId) {
+        try {
+          const response = await fetch(`/api/grade-changes/${changeId}/`, {
+            method: "DELETE",
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Show success message
+            showNotification("Grade change deleted successfully ✅", "success");
+
+            // Refresh the table
+            refreshData();
+          } else {
+            showNotification(
+              `Failed to delete grade change: ${data.message} ❌`,
+              "error"
+            );
+          }
+        } catch (error) {
+          console.error("Error deleting grade change:", error);
+          showNotification("Error deleting grade change ❌", "error");
+        }
+      }
+
+      // Function to show notifications
+      function showNotification(message, type) {
+        // Remove existing notification if any
+        const existingNotification = document.querySelector(
+          ".admin-notification"
+        );
+        if (existingNotification) {
+          existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement("div");
+        notification.className = `admin-notification ${type}`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+          notification.style.animation = "slideIn 0.3s ease-out reverse";
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+
+      function refreshData() {
+        const regno = document.getElementById("regnoSearch").value.trim();
+        search(regno);
+      }
+
+      // Helper functions
+      function showLoading(show) {
+        const loadingElement = document.getElementById("loadingMessage");
+        if (loadingElement) {
+          if (show) {
+            loadingElement.classList.remove("hidden");
+          } else {
+            loadingElement.classList.add("hidden");
+          }
+        }
+      }
+
+      function showError(message) {
+        const errorElement = document.getElementById("errorMessage");
+        if (errorElement) {
+          errorElement.textContent = message;
+          errorElement.classList.remove("hidden");
+        }
+      }
+
+      function hideError() {
+        const errorElement = document.getElementById("errorMessage");
+        if (errorElement) {
+          errorElement.classList.add("hidden");
+        }
+      }
+
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+
+      // Auto-refresh every 5 minutes
+      setInterval(refreshData, 5 * 60 * 1000);
+    </script>
+  </body>
+</html>

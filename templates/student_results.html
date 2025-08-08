@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Results for {{ regno }}</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 
@@ -12,6 +13,7 @@
   <div class="container">
     <nav>
       <a href="/">🏠 Home</a> &raquo;
+      <a href="/users/">👥 Students</a> &raquo;
       <span>{{ student_name }}</span>
     </nav>
 
@@ -36,7 +38,7 @@
       </div>
       {% endif %}
 
-      <a href="/zip/{{ regno }}" class="download-link">
+      <a href="/users/{{ regno }}/zip/" class="download-link">
         📦 Download All PDFs (ZIP)
       </a>
 
@@ -47,25 +49,22 @@
           {% if file.gpa %}
           <span class="semester-gpa">GPA: {{ file.gpa }}</span>
           {% endif %}
-        </div>
-        {% if file.subjects %}
-        <table class="subjects-table">
+        </div> {% if file.subjects %} <table class="subjects-table">
           <thead>
             <tr>
-              <th>Subject Code</th>
-              <th>Subject Name</th>
-              <th>Grade</th>
-              <th>Subject Credits</th>
-
-              <th>Grade Points</th>
+              <th data-label="Subject Code">Subject Code</th>
+              <th data-label="Subject Name">Subject Name</th>
+              <th data-label="Grade">Grade</th>
+              <th data-label="Credits">Subject Credits</th>
+              <th data-label="Points">Grade Points</th>
             </tr>
           </thead>
           <tbody>
             {% for subject in file.subjects %}
             <tr>
-              <td>{{ subject.code }}</td>
-              <td>{{ subject.name }}</td>
-              <td class="grade-cell">
+              <td data-label="Subject Code">{{ subject.code }}</td>
+              <td data-label="Subject Name">{{ subject.name }}</td>
+              <td data-label="Grade" class="grade-cell">
                 <select class="grade-dropdown" data-subject-code="{{ subject.code }}" data-credits="{{ subject.credits }}"
                   data-semester="{{ file.filename.split('_')[-1].replace('.pdf', '').replace('sem', '') }}">
                   <option value="O" {% if subject.grade=='O' %}selected{% endif %}>O</option>
@@ -79,9 +78,9 @@
                   <option value="NA" {% if subject.grade=='NA' %}selected{% endif %}>NA</option>
                 </select>
               </td>
-              <td class="text-center">{{ subject.credits }}</td>
-
-              <td class="text-center grade-points-cell" data-subject-code="{{ subject.code }}">{{ subject.grade_points_earned }}</td>
+              <td data-label="Credits" class="text-center">{{ subject.credits }}</td>
+              <td data-label="Points" class="text-center grade-points-cell" data-subject-code="{{ subject.code }}">{{ subject.grade_points_earned }}
+              </td>
             </tr>
             {% endfor %}
           </tbody>
@@ -107,7 +106,7 @@
           </div>
         </div>
         {% else %}
-        <div style="padding: 1rem; text-align: center; color: #666">
+        <div class="no-data-message">
           No subject data could be extracted from this semester's PDF.
         </div>
         {% endif %}
@@ -207,7 +206,7 @@
     // Function to save grade change to database
     async function saveGradeChange(regno, subjectCode, semester, originalGrade, newGrade, credits) {
       try {
-        const response = await fetch('/api/save-grade-change', {
+        const response = await fetch('/api/grade-changes/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -251,38 +250,6 @@
       const notification = document.createElement('div');
       notification.className = `grade-notification ${type}`;
       notification.textContent = message;
-      notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#48bb78' : '#e53e3e'};
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 1000;
-        font-weight: 500;
-        animation: slideIn 0.3s ease-out;
-      `;
-
-      // Add CSS animation
-      if (!document.querySelector('#notification-styles')) {
-        const styles = document.createElement('style');
-        styles.id = 'notification-styles';
-        styles.textContent = `
-          @keyframes slideIn {
-            from {
-              transform: translateX(100%);
-              opacity: 0;
-            }
-            to {
-              transform: translateX(0);
-              opacity: 1;
-            }
-          }
-        `;
-        document.head.appendChild(styles);
-      }
 
       document.body.appendChild(notification);
 
@@ -292,6 +259,7 @@
         setTimeout(() => notification.remove(), 300);
       }, 3000);
     }
+
     // Add event listeners to all grade dropdowns
     document.addEventListener('DOMContentLoaded', function () {
       const gradeDropdowns = document.querySelectorAll('.grade-dropdown');
