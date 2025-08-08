@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Load environment variables
 load_dotenv()
@@ -104,11 +104,7 @@ class GradeChange(Base):
     original_grade = Column(String(5), nullable=False)
     new_grade = Column(String(5), nullable=False)
     credits = Column(Integer, nullable=False)
-    changed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    
-    # Optional: Add user tracking if you have user authentication
-    # user_ip = Column(String(45))  # For IPv4/IPv6 addresses
-    # user_agent = Column(String(500))  # Browser info
+    changed_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
 
 
 # Database functions
