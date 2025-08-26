@@ -32,8 +32,27 @@
         {% set stats.total_credits = stats.total_credits + file.total_credits %}
         {% endif %}
         {% endfor %}
-        {% set overall_cgpa = "%.4f"|format(stats.total_gp / stats.total_credits) if stats.total_credits > 0 else "N/A" %} {% if overall_cgpa %}
+        {% set overall_cgpa = "%.4f"|format(stats.total_gp / stats.total_credits) if stats.total_credits > 0 else "N/A" %} 
+        
+        {% set has_na_grades = namespace(found=false) %}
+        {% for file in files %}
+        {% if file.subjects %}
+        {% for subject in file.subjects %}
+        {% if subject.grade == 'NA' %}
+        {% set has_na_grades.found = true %}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+        
+        {% if overall_cgpa %}
         <strong>📊 Overall CGPA: <span id="overall-cgpa">{{ overall_cgpa }}</span></strong>
+        {% if has_na_grades.found %}
+        <div class="missing-grades-warning">
+          <span class="warning-icon">⚠️</span>
+          <span>Fill in missing grades for subjects</span>
+        </div>
+        {% endif %}
         {% endif %}
       </div>
       {% endif %}
@@ -201,6 +220,45 @@
         const cgpa = (overallTotalGradePoints / overallTotalCredits).toFixed(4);
         overallCgpaElement.textContent = cgpa;
       }
+
+      // Check for NA grades and update warning visibility
+      updateMissingGradesWarning();
+    }
+
+    // Function to check for NA grades and show/hide warning
+    function updateMissingGradesWarning() {
+      const allGradeDropdowns = document.querySelectorAll('.grade-dropdown');
+      let hasNAGrades = false;
+
+      allGradeDropdowns.forEach(dropdown => {
+        if (dropdown.value === 'NA') {
+          hasNAGrades = true;
+        }
+      });
+
+      let warningElement = document.querySelector('.missing-grades-warning');
+      
+      if (hasNAGrades) {
+        if (!warningElement) {
+          // Create warning element if it doesn't exist
+          const cgpaElement = document.getElementById('overall-cgpa');
+          if (cgpaElement) {
+            warningElement = document.createElement('div');
+            warningElement.className = 'missing-grades-warning';
+            warningElement.innerHTML = `
+              <span class="warning-icon">⚠️</span>
+              <span>Fill in missing grades for subjects</span>
+            `;
+            cgpaElement.parentElement.parentElement.appendChild(warningElement);
+          }
+        } else {
+          warningElement.style.display = 'flex';
+        }
+      } else {
+        if (warningElement) {
+          warningElement.style.display = 'none';
+        }
+      }
     }
 
     // Function to save grade change to database
@@ -294,6 +352,9 @@
         // Set initial styling
         dropdown.className = `grade-dropdown grade-${dropdown.value.replace('+', '-plus')}`;
       });
+
+      // Initialize missing grades warning visibility
+      updateMissingGradesWarning();
     });
   </script>
 </body>

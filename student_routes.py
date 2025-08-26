@@ -4,6 +4,7 @@ Student routes for viewing results and downloading PDFs
 
 import io
 import zipfile
+from datetime import datetime
 from fastapi import APIRouter, Request, HTTPException, Depends, Form
 from fastapi.responses import Response, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -16,6 +17,8 @@ from database import (
     Grade,
     Semester,
     GradeChange,
+    StudentLoginLog,
+    IST,
     download_pdf,
 )
 
@@ -94,7 +97,25 @@ def student_auth_submit(
         raise HTTPException(status_code=404, detail="Student not found")
 
     if dob.strip() == student.dob:
+        # Get client information for logging
+        client_ip = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("user-agent", "unknown")
+        
+        # Create student login log entry
+        login_log = StudentLoginLog(
+            regno=regno,
+            student_name=student.name,
+            login_time=datetime.now(IST),
+            ip_address=client_ip,
+            user_agent=user_agent
+        )
+        db.add(login_log)
+        db.commit()
+        
+        # Store login log ID in session for logout tracking
         request.session[f"student_{regno}"] = True
+        request.session[f"student_login_log_id_{regno}"] = login_log.id
+        
         return RedirectResponse(url=f"/users/{regno}/results/", status_code=302)
     else:
         return templates.TemplateResponse(

@@ -19,60 +19,122 @@
           <button type="submit" class="admin-logout-btn">🚪 Logout</button>
         </form>
       </div>
-      <div class="card glass-card">
-        <h1>📊 Grade Changes Monitor</h1>
 
-        <div class="stats-cards">
-          <div class="stat-card">
-            <div class="stat-number" id="totalChanges">-</div>
-            <div class="stat-label">Total Changes</div>
+      <!-- Admin Navigation Menu -->
+      <div class="admin-nav">
+        <a
+          href="#grade-changes"
+          class="admin-nav-link active"
+          onclick="showTab('grade-changes', this)"
+        >
+          📊 Grade Changes
+        </a>
+        <a
+          href="#student-logs"
+          class="admin-nav-link"
+          onclick="showTab('student-logs', this)"
+        >
+          👥 Student Logs
+        </a>
+      </div>
+
+      <!-- Grade Changes Tab Content -->
+      <div id="grade-changes" class="tab-content active">
+        <div class="card glass-card">
+          <h1>📊 Grade Changes Monitor</h1>
+
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="stat-number" id="totalChanges">-</div>
+              <div class="stat-label">Total Changes</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="todayChanges">-</div>
+              <div class="stat-label">Today's Changes</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="activeStudents">-</div>
+              <div class="stat-label">Students with Changes</div>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-number" id="todayChanges">-</div>
-            <div class="stat-label">Today's Changes</div>
+
+          <div class="search-section">
+            <h3>Search Grade Changes</h3>
+            <form onsubmit="event.preventDefault(); search();">
+              <input
+                type="text"
+                id="regnoSearch"
+                placeholder="🔍 Enter registration number..."
+                autofocus
+              />
+              <button type="submit">Search</button>
+            </form>
           </div>
-          <div class="stat-card">
-            <div class="stat-number" id="activeStudents">-</div>
-            <div class="stat-label">Students with Changes</div>
+
+          <div id="loadingMessage" class="loading-centered hidden">
+            Loading grade changes...
+          </div>
+
+          <div id="errorMessage" class="error-message hidden"></div>
+
+          <div id="changesContainer">
+            <div id="changesCount" class="changes-count"></div>
+            <table class="changes-table hidden" id="changesTable">
+              <thead>
+                <tr>
+                  <th>Reg No</th>
+                  <th>Student Name</th>
+                  <th>Subject</th>
+                  <th>Semester</th>
+                  <th>Grade Change</th>
+                  <th>Credits</th>
+                  <th>Changed At</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="changesTableBody"></tbody>
+            </table>
           </div>
         </div>
+      </div>
 
-        <div class="search-section">
-          <h3>Search Grade Changes</h3>
-          <form onsubmit="event.preventDefault(); search();">
-            <input
-              type="text"
-              id="regnoSearch"
-              placeholder="🔍 Enter registration number..."
-              autofocus
-            />
-            <button type="submit">Search</button>
-          </form>
-        </div>
+      <!-- Student Logs Tab Content -->
+      <div id="student-logs" class="tab-content">
+        <div class="card glass-card">
+          <h1>👥 Student Login Logs</h1>
 
-        <div id="loadingMessage" class="loading-centered hidden">
-          Loading grade changes...
-        </div>
+          <div class="stats-cards student-logs-stats" id="student-stats">
+            <div class="stat-card">
+              <div class="stat-number" id="totalLogins">-</div>
+              <div class="stat-label">Recent Logins</div>
+            </div>
 
-        <div id="errorMessage" class="error-message hidden"></div>
+            <div class="stat-card">
+              <div class="stat-number" id="uniqueStudents">-</div>
+              <div class="stat-label">Unique Students</div>
+            </div>
+          </div>
 
-        <div id="changesContainer">
-          <div id="changesCount" class="changes-count"></div>
-          <table class="changes-table hidden" id="changesTable">
-            <thead>
-              <tr>
-                <th>Reg No</th>
-                <th>Student Name</th>
-                <th>Subject</th>
-                <th>Semester</th>
-                <th>Grade Change</th>
-                <th>Credits</th>
-                <th>Changed At</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="changesTableBody"></tbody>
-          </table>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Login Time</th>
+                  <th>IP Address</th>
+                  <th>Browser/Device</th>
+                </tr>
+              </thead>
+              <tbody id="studentLogsTableBody">
+                <!-- Student logs will be populated here -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="noStudentLogs" class="no-data-message hidden">
+            <h3>No student login logs found</h3>
+            <p>No student login activity has been recorded yet.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -80,8 +142,38 @@
     <script>
       let currentData = [];
 
+      // Tab functionality
+      function showTab(tabId, element) {
+        // Hide all tab contents
+        const tabContents = document.querySelectorAll(".tab-content");
+        tabContents.forEach((tab) => tab.classList.remove("active"));
+
+        // Remove active class from all nav links
+        const navLinks = document.querySelectorAll(".admin-nav-link");
+        navLinks.forEach((link) => link.classList.remove("active"));
+
+        // Show selected tab content
+        document.getElementById(tabId).classList.add("active");
+
+        // Add active class to clicked nav link
+        if (element) {
+          element.classList.add("active");
+        }
+
+        // Load student logs if switching to that tab
+        if (tabId === "student-logs") {
+          loadStudentLogs();
+        }
+      }
+
       // Load all grade changes on page load
       document.addEventListener("DOMContentLoaded", function () {
+        // Show grade changes tab by default
+        const firstNavLink = document.querySelector(".admin-nav-link.active");
+        if (firstNavLink) {
+          showTab("grade-changes", firstNavLink);
+        }
+
         refreshData();
       });
 
@@ -277,6 +369,119 @@
 
       // Auto-refresh every 5 minutes
       setInterval(refreshData, 5 * 60 * 1000);
+
+      // Student logs functionality
+      async function loadStudentLogs() {
+        try {
+          const response = await fetch("/admin/student-logs-data");
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          updateStudentStats(data.stats);
+          populateStudentLogsTable(data.logs);
+        } catch (error) {
+          console.error("Error loading student logs:", error);
+          showStudentLogsError(error.message);
+        }
+      }
+
+      function updateStudentStats(stats) {
+        document.getElementById("totalLogins").textContent =
+          stats.total_logins || "0";
+        document.getElementById("uniqueStudents").textContent =
+          stats.unique_students || "0";
+      }
+
+      function populateStudentLogsTable(logs) {
+        const tbody = document.getElementById("studentLogsTableBody");
+        const noLogsDiv = document.getElementById("noStudentLogs");
+
+        if (!logs || logs.length === 0) {
+          tbody.innerHTML = "";
+          noLogsDiv.classList.remove("hidden");
+          return;
+        }
+
+        noLogsDiv.classList.add("hidden");
+        tbody.innerHTML = logs
+          .map(
+            (log) => `
+          <tr>
+            <td>
+              <div class="student-info">
+                <div class="student-name">${log.name}</div>
+                <div class="student-regno">${log.regno}</div>
+              </div>
+            </td>
+            <td>
+              <div class="datetime-cell">
+                <div class="date">${formatDate(log.login_time)}</div>
+                <div class="time">${formatTime(log.login_time)}</div>
+              </div>
+            </td>
+            <td><span class="ip-address">${log.ip_address || "N/A"}</span></td>
+            <td>
+              <div class="user-agent">
+                <span class="browser-info">${getBrowserInfo(
+                  log.user_agent
+                )}</span>
+                <span class="device-type ${getDeviceType(
+                  log.user_agent
+                )}">${getDeviceType(log.user_agent)}</span>
+              </div>
+            </td>
+          </tr>
+        `
+          )
+          .join("");
+      }
+
+      function showStudentLogsError(message) {
+        const tbody = document.getElementById("studentLogsTableBody");
+        tbody.innerHTML = `<tr><td colspan="6" class="error-row">Error: ${message}</td></tr>`;
+      }
+
+      function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      }
+
+      function formatTime(dateString) {
+        return new Date(dateString).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+      }
+
+      function getBrowserInfo(userAgent) {
+        if (!userAgent) return "Unknown";
+
+        if (userAgent.includes("Chrome")) return "🌐 Chrome";
+        if (userAgent.includes("Firefox")) return "🦊 Firefox";
+        if (userAgent.includes("Safari")) return "🧭 Safari";
+        if (userAgent.includes("Edge")) return "🔷 Edge";
+        return "🌐 Browser";
+      }
+
+      function getDeviceType(userAgent) {
+        if (!userAgent) return "unknown";
+
+        if (
+          userAgent.includes("Mobile") ||
+          userAgent.includes("Android") ||
+          userAgent.includes("iPhone")
+        ) {
+          return "mobile";
+        }
+        return "desktop";
+      }
     </script>
   </body>
 </html>

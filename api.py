@@ -6,12 +6,13 @@ from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from database import get_db, Student, GradeChange
 
 # Create router for API routes
 router = APIRouter(prefix="/api")
 
+IST = timezone(timedelta(hours=5, minutes=30))  # +05:30
 
 def is_admin_authenticated(request: Request) -> bool:
     """Check if admin is authenticated in the session"""
@@ -47,7 +48,7 @@ async def save_grade_change(
             original_grade=grade_change.original_grade,
             new_grade=grade_change.new_grade,
             credits=grade_change.credits,
-            changed_at=datetime.now(timezone.utc),
+            changed_at=datetime.now(IST),
         )
 
         # Save to database

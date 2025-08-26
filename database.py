@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 # Load environment variables
 load_dotenv()
@@ -37,6 +37,8 @@ supabase: Client = create_client(url, key)
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+IST = timezone(timedelta(hours=5, minutes=30))  # +05:30
 
 
 # Database Models
@@ -104,8 +106,18 @@ class GradeChange(Base):
     original_grade = Column(String(5), nullable=False)
     new_grade = Column(String(5), nullable=False)
     credits = Column(Integer, nullable=False)
-    changed_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    changed_at = Column(DateTime, default=lambda: datetime.now(IST), nullable=False)
 
+
+class StudentLoginLog(Base):
+    __tablename__ = "student_login_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    regno = Column(String(20), nullable=False, index=True)
+    student_name = Column(String(100), nullable=False)
+    login_time = Column(DateTime, default=lambda: datetime.now(IST), nullable=False)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(String(500), nullable=True)
 
 # Database functions
 def get_db():
