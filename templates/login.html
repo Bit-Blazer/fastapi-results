@@ -1,48 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page_title or "Authentication" }} - Student Portal</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ page_title or "Authentication" }} - Student Portal</title>
-  <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
-  <link rel="stylesheet" href="/static/style.css" />
-</head>
+  <body>
+    <div class="auth-container">
+      <div class="card glass-card auth-card">
+        {% if page_title == "Admin Login" %}
+        <h2 class="text-center">🔐 Admin Login</h2>
+        <p class="text-center mb-4">
+          Enter the admin password to access the grade changes dashboard.
+        </p>
 
-<body>
-  <div class="auth-container">
-    <div class="card glass-card auth-card">
-      {% if page_title == "Admin Login" %}
-      <h2 class="text-center">🔐 Admin Login</h2>
-      <p class="text-center mb-4">
-        Enter the admin password to access the grade changes dashboard.
-      </p>
+        <form method="post" action="{{ action_url or '/admin/login' }}">
+          <div class="mb-2">
+            <input
+              type="password"
+              name="password"
+              placeholder="🔑 Admin Password"
+              required
+              class="auth-input-full"
+              autofocus
+            />
+          </div>
+          <input type="submit" value="🚀 Login" class="auth-submit-full" />
+        </form>
+        {% else %}
+        <h2 class="text-center">🔐 Student Authentication</h2>
+        <p class="text-center mb-4">
+          Enter your date of birth to access results for
+          <strong>{{ regno }} - {{ student_name}}</strong>
+        </p>
 
-      <form method="post" action="{{ action_url or '/admin/login' }}">
-        <div class="mb-2">
-          <input type="password" name="password" placeholder="🔑 Admin Password" required class="auth-input-full" autofocus />
-        </div>
-        <input type="submit" value="🚀 Login" class="auth-submit-full" />
-      </form>
-      {% else %}
-      <h2 class="text-center">🔐 Student Authentication</h2>
-      <p class="text-center mb-4">
-        Enter your date of birth to access results for
-        <strong>{{ regno }} - {{ student_name}}</strong>
-      </p>
-
-      <form method="post">
-        <div class="mb-2">
-          <input type="text" name="dob" placeholder="📅 DD-MM-YYYY" required class="auth-input-full" pattern="\d{2}-\d{2}-\d{4}"
-            title="Please enter date in DD-MM-YYYY format" autofocus />
-        </div>
-        <input type="submit" value="🚀 Access Results" class="auth-submit-full" />
-      </form>
-      {% endif %} {% if error %}
-      <div class="error mt-2">❌ {{ error }}. Please try again.</div>
-      {% endif %}
+        <form method="post">
+          <div class="mb-2">
+            <input
+              type="text"
+              name="dob"
+              placeholder="📅 DD-MM-YYYY"
+              required
+              class="auth-input-full"
+              pattern="\d{2}-\d{2}-\d{4}"
+              title="Please enter date in DD-MM-YYYY format"
+              autofocus
+            />
+          </div>
+          <input
+            type="submit"
+            value="🚀 Access Results"
+            class="auth-submit-full"
+          />
+        </form>
+        {% endif %} {% if error %}
+        <div class="error mt-2">❌ {{ error }}. Please try again.</div>
+        {% endif %}
+      </div>
     </div>
-  </div>
-</body>
-
+  </body>
 </html>

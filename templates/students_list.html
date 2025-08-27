@@ -1,50 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Results Portal</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Results Portal</title>
-  <link rel="icon" type="image/svg+xml" href="/static/favicon.ico" />
-  <link rel="stylesheet" href="/static/style.css" />
-</head>
+  <body>
+    <div class="container">
+      <div class="card glass-card">
+        <h1>🎓 Student Results Portal</h1>
+        <div class="search-form">
+          <form method="get" action="/users/" class="users-search-form">
+            <input
+              type="text"
+              name="q"
+              placeholder="🔍 Search by name or registration number..."
+              value="{{ q }}"
+              autofocus
+            />
+            <button type="submit">Search</button>
+          </form>
+        </div>
 
-<body>
-  <div class="container">
-    <div class="card glass-card">
-      <h1>🎓 Student Results Portal</h1>
-      <div class="search-form">
-        <form method="get" action="/users/" class="users-search-form">
-          <input type="text" name="q" placeholder="🔍 Search by name or registration number..." value="{{ q }}" autofocus />
-          <button type="submit">Search</button>
-        </form>
+        {% if results %}
+        <h3>
+          {% if q %}Search Results{% else %}All Students{% endif %} ({{
+          results|length }} found)
+        </h3>
+        <ul class="student-list">
+          {% for r in results %}
+          <li class="student-item">
+            <a href="/users/{{ r.regno }}/results/" class="student-link">
+              <div class="student-regno">{{ r.regno }}</div>
+              {% if r.name %}
+              <div class="student-name">{{ r.name }}</div>
+              {% endif %}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-center">
+          <h3>No students found{% if q %} for "{{ q }}"{% endif %}</h3>
+          <p>Try a different search term or check the spelling.</p>
+        </div>
+        {% endif %}
       </div>
-
-      {% if results %}
-      <h3>
-        {% if q %}Search Results{% else %}All Students{% endif %} ({{
-        results|length }} found)
-      </h3>
-      <ul class="student-list">
-        {% for r in results %}
-        <li class="student-item">
-          <a href="/users/{{ r.regno }}/results/" class="student-link">
-            <div class="student-regno">{{ r.regno }}</div>
-            {% if r.name %}
-            <div class="student-name">{{ r.name }}</div>
-            {% endif %}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <div class="text-center">
-        <h3>No students found{% if q %} for "{{ q }}"{% endif %}</h3>
-        <p>Try a different search term or check the spelling.</p>
-      </div>
-      {% endif %}
     </div>
-  </div>
-</body>
-
+  </body>
 </html>

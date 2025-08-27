@@ -20,11 +20,12 @@ if not DATABASE_URL:
     SUPABASE_PORT = os.getenv("SUPABASE_PORT", "")
     DATABASE_URL = f"postgresql://postgres:{DB_PASSWORD}@db.{SUPABASE_PROJECT_ID}.supabase.co:{SUPABASE_PORT}/postgres"
 
+
 def migrate_database():
     """Add the grade_changes table to the database."""
     try:
         engine = create_engine(DATABASE_URL)
-        
+
         # SQL to create the grade_changes table
         create_table_sql = """
         CREATE TABLE IF NOT EXISTS grade_changes (
@@ -40,7 +41,7 @@ def migrate_database():
                 UNIQUE (regno, subject_code, semester, changed_at)
         );
         """
-        
+
         # Create index for better query performance
         create_index_sql = """
         CREATE INDEX IF NOT EXISTS idx_grade_changes_regno 
@@ -49,19 +50,19 @@ def migrate_database():
         CREATE INDEX IF NOT EXISTS idx_grade_changes_changed_at 
         ON grade_changes (changed_at);
         """
-        
+
         with engine.connect() as connection:
             # Create the table
             connection.execute(text(create_table_sql))
             print("✅ Created grade_changes table successfully!")
-            
+
             # Create indexes
             connection.execute(text(create_index_sql))
             print("✅ Created indexes successfully!")
-            
+
             # Commit the transaction
             connection.commit()
-            
+
         print("\n🎉 Migration completed successfully!")
         print("\nThe grade_changes table has been added with the following columns:")
         print("  - id (Primary Key)")
@@ -72,18 +73,19 @@ def migrate_database():
         print("  - new_grade (New Grade)")
         print("  - credits (Subject Credits)")
         print("  - changed_at (Timestamp of Change)")
-        
+
     except Exception as e:
         print(f"❌ Migration failed: {e}")
         return False
-    
+
     return True
+
 
 def check_table_exists():
     """Check if the grade_changes table already exists."""
     try:
         engine = create_engine(DATABASE_URL)
-        
+
         check_sql = """
         SELECT EXISTS (
             SELECT FROM information_schema.tables 
@@ -91,19 +93,20 @@ def check_table_exists():
             AND table_name = 'grade_changes'
         );
         """
-        
+
         with engine.connect() as connection:
             result = connection.execute(text(check_sql))
             exists = result.fetchone()[0]
             return exists
-            
+
     except Exception as e:
         print(f"❌ Error checking table existence: {e}")
         return False
 
+
 if __name__ == "__main__":
     print("🚀 Starting grade_changes table migration...")
-    
+
     # Check if table already exists
     if check_table_exists():
         print("ℹ️  grade_changes table already exists. Skipping migration.")

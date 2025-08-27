@@ -119,6 +119,7 @@ class StudentLoginLog(Base):
     ip_address = Column(String(45), nullable=True)
     user_agent = Column(String(500), nullable=True)
 
+
 # Database functions
 def get_db():
     db = SessionLocal()

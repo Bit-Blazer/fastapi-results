@@ -275,7 +275,7 @@
       // Function to delete a grade change
       async function deleteGradeChange(changeId) {
         try {
-          const response = await fetch(`/api/grade-changes/${changeId}/`, {
+          const response = await fetch(`/api/grade-changes/${changeId}`, {
             method: "DELETE",
           });
 

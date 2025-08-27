@@ -24,7 +24,7 @@ class PDFProcessor:
     def __init__(self):
         # Setup logging
         self.setup_logging()
-        
+
         # Load subjects data from JSON file
         self.load_subjects_data()
 
@@ -91,9 +91,11 @@ class PDFProcessor:
         try:
             subjects_file = Path("subjects.json")
             if subjects_file.exists():
-                with open(subjects_file, 'r', encoding='utf-8') as f:
+                with open(subjects_file, "r", encoding="utf-8") as f:
                     self.subjects_data = json.load(f)
-                self.log(f"📚 Loaded {len(self.subjects_data)} subjects from subjects.json")
+                self.log(
+                    f"📚 Loaded {len(self.subjects_data)} subjects from subjects.json"
+                )
             else:
                 self.log("⚠️  subjects.json not found, using default credits")
                 self.subjects_data = {}
@@ -200,9 +202,11 @@ class PDFProcessor:
     def get_subject_credits(self, subject_code: str) -> int:
         """Get credits for a subject from the loaded data, default to 4 if not found"""
         if subject_code in self.subjects_data:
-            return self.subjects_data[subject_code].get('credits', 4)
+            return self.subjects_data[subject_code].get("credits", 4)
         else:
-            self.log(f"⚠️  Subject {subject_code} not found in subjects.json, using default credits (4)")
+            self.log(
+                f"⚠️  Subject {subject_code} not found in subjects.json, using default credits (4)"
+            )
             return 4
 
     def process_pdf(self, pdf_path: Path):

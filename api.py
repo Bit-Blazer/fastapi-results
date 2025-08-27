@@ -14,6 +14,7 @@ router = APIRouter(prefix="/api")
 
 IST = timezone(timedelta(hours=5, minutes=30))  # +05:30
 
+
 def is_admin_authenticated(request: Request) -> bool:
     """Check if admin is authenticated in the session"""
     return request.session.get("admin_authenticated", False)

@@ -29,6 +29,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 router = APIRouter()
 
 
+@router.head("/")
 @router.get("/")
 def landing_page(request: Request):
     """Landing page with navigation options"""
@@ -100,22 +101,22 @@ def student_auth_submit(
         # Get client information for logging
         client_ip = request.client.host if request.client else "unknown"
         user_agent = request.headers.get("user-agent", "unknown")
-        
+
         # Create student login log entry
         login_log = StudentLoginLog(
             regno=regno,
             student_name=student.name,
             login_time=datetime.now(IST),
             ip_address=client_ip,
-            user_agent=user_agent
+            user_agent=user_agent,
         )
         db.add(login_log)
         db.commit()
-        
+
         # Store login log ID in session for logout tracking
         request.session[f"student_{regno}"] = True
         request.session[f"student_login_log_id_{regno}"] = login_log.id
-        
+
         return RedirectResponse(url=f"/users/{regno}/results/", status_code=302)
     else:
         return templates.TemplateResponse(
@@ -264,7 +265,7 @@ def download_student_zip(regno: str, request: Request, db: Session = Depends(get
     student = db.query(Student).filter(Student.regno == regno).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
-    
+
     # Get all semesters for this student
     semesters = db.query(Semester).filter(Semester.student_id == student.id).all()
 
