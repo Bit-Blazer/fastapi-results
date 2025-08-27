@@ -1,5 +1,4 @@
-fastapi
-uvicorn
+fastapi[standard]
 jinja2
 starlette[full]
 python-dotenv
