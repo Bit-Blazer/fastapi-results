@@ -185,7 +185,10 @@
           showLoading(true);
           hideError();
 
-          const response = await fetch(`/api/grade-changes/${regno}`);
+          const url = regno
+            ? `/api/grade-changes/?regno=${encodeURIComponent(regno)}`
+            : "/api/grade-changes/";
+          const response = await fetch(url);
           const data = await response.json();
 
           if (data.success) {
@@ -373,7 +376,7 @@
       // Student logs functionality
       async function loadStudentLogs() {
         try {
-          const response = await fetch("/admin/student-logs-data");
+          const response = await fetch("/api/student-logs");
           const data = await response.json();
 
           if (data.error) {

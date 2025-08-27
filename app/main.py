@@ -1,11 +1,9 @@
 """
-Main FastAPI application for student results portal
-Refactored into modular components
+FastAPI application for student results portal
 """
 
 import os
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import RedirectResponse, JSONResponse, FileResponse
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
@@ -14,16 +12,21 @@ from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 
 # Import our modular routers
-from auth_routes import router as auth_router
-from admin_routes import router as admin_router
-from api import router as api_router
-from student_routes import router as student_router
+from .admin_routes import router as admin_router
+from .api import router as api_router
+from .student_routes import router as student_router
 
 # Load environment variables
 load_dotenv()
 
 # Create FastAPI app
-app = FastAPI(title="Student Results Portal", version="1.0.0")
+app = FastAPI(
+    title="Student Results Portal",
+    version="1.0.0",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
 
 # Add session middleware for authentication
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", ""))
@@ -34,7 +37,6 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 # Include routers
-app.include_router(auth_router)  # Authentication routes (student and admin auth)
 app.include_router(admin_router)  # Admin management routes (/admin/*)
 app.include_router(api_router)  # API routes (/api/*)
 app.include_router(student_router)  # Student routes (/, /{regno}/, /pdf/*, /zip/*)

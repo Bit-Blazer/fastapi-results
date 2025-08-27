@@ -1,18 +1,19 @@
 """
-Authentication routes for admin login functionality
+Admin routes for admin login functionality
 """
 
 import os
-from fastapi import APIRouter, Request, HTTPException, Form
+from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-# Create router for authentication routes
-router = APIRouter()
+# Create router for admin routes
+router = APIRouter(prefix="/admin")
 
 
 # Admin authentication helper functions
@@ -21,24 +22,20 @@ def is_admin_authenticated(request: Request) -> bool:
     return request.session.get("admin_authenticated", False)
 
 
-def require_admin_auth(request: Request):
-    """Dependency to require admin authentication"""
+@router.get("/dashboard/")
+async def admin_dashboard(request: Request):
+    """Main admin dashboard"""
     if not is_admin_authenticated(request):
-        raise HTTPException(status_code=401, detail="Authentication required")
-    return True
+        return RedirectResponse(url="/admin/login/", status_code=302)
+
+    return templates.TemplateResponse(
+        "admin_dashboard.html",
+        {"request": request, "page_title": "Grade Changes Management"},
+    )
 
 
 # Admin authentication routes
-@router.get("/admin/")
-async def admin_base(request: Request):
-    """Base admin route that redirects to appropriate page"""
-    if is_admin_authenticated(request):
-        return RedirectResponse(url="/admin/dashboard/", status_code=302)
-    else:
-        return RedirectResponse(url="/admin/login/", status_code=302)
-
-
-@router.get("/admin/login/")
+@router.get("/login/")
 async def admin_login_page(request: Request, error: str = None):
     """Display admin login page"""
     if is_admin_authenticated(request):
@@ -56,7 +53,7 @@ async def admin_login_page(request: Request, error: str = None):
     )
 
 
-@router.post("/admin/login/")
+@router.post("/login/")
 async def admin_login(request: Request, password: str = Form(...)):
     """Handle admin login submission"""
     admin_password = os.getenv("ADMIN_PASSWORD", "")
@@ -70,7 +67,7 @@ async def admin_login(request: Request, password: str = Form(...)):
         )
 
 
-@router.post("/admin/logout/")
+@router.post("/logout/")
 async def admin_logout(request: Request):
     """Handle admin logout"""
     request.session.pop("admin_authenticated", None)

@@ -10,7 +10,7 @@ from fastapi.responses import Response, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from sqlalchemy.orm import Session
-from database import (
+from .database import (
     get_db,
     Student,
     Subject,
@@ -33,12 +33,6 @@ router = APIRouter()
 @router.get("/")
 def landing_page(request: Request):
     """Landing page with navigation options"""
-    return templates.TemplateResponse("home.html", {"request": request})
-
-
-@router.get("/dashboard")
-def dashboard_page(request: Request):
-    """Dashboard page - alias for landing page"""
     return templates.TemplateResponse("home.html", {"request": request})
 
 

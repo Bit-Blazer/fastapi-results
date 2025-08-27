@@ -5,9 +5,10 @@ API routes for grade changes functionality
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from pydantic import BaseModel
 from datetime import datetime, timezone, timedelta
-from database import get_db, Student, GradeChange
+from .database import get_db, Student, GradeChange, StudentLoginLog
 
 # Create router for API routes
 router = APIRouter(prefix="/api")
@@ -126,16 +127,33 @@ async def delete_grade_change(
 
 
 @router.get("/grade-changes/")
-async def get_all_grade_changes(
-    db: Session = Depends(get_db), limit: int = 100, offset: int = 0
+async def get_grade_changes(
+    request: Request, db: Session = Depends(get_db), regno: str = None, limit: int = 100, offset: int = 0
 ):
-    """Get all grade changes across all students (for administrative monitoring)"""
+    """Get grade changes - all students or filtered by registration number"""
+    # Check admin authentication
+    if not is_admin_authenticated(request):
+        return JSONResponse(
+            status_code=401,
+            content={"success": False, "message": "Authentication required"},
+        )
+        
     try:
-        # Get grade changes with student names
+        # Base query with student names
+        query = db.query(GradeChange, Student.name).join(
+            Student, GradeChange.regno == Student.regno
+        )
+
+        # If regno is provided, filter by it and validate student exists
+        if regno:
+            student = db.query(Student).filter(Student.regno == regno).first()
+            if not student:
+                raise HTTPException(status_code=404, detail="Student not found")
+            query = query.filter(GradeChange.regno == regno)
+
+        # Apply ordering, offset and limit
         grade_changes = (
-            db.query(GradeChange, Student.name)
-            .join(Student, GradeChange.regno == Student.regno)
-            .order_by(GradeChange.changed_at.desc())
+            query.order_by(GradeChange.changed_at.desc())
             .offset(offset)
             .limit(limit)
             .all()
@@ -159,21 +177,35 @@ async def get_all_grade_changes(
                 }
             )
 
-        # Get total count
-        total_changes = db.query(GradeChange).count()
+        # Get total count (with same filter if applied)
+        total_query = db.query(GradeChange)
+        if regno:
+            total_query = total_query.filter(GradeChange.regno == regno)
+        total_changes = total_query.count()
+
+        # Prepare response content
+        response_content = {
+            "success": True,
+            "total_changes": total_changes,
+            "showing": len(changes_data),
+            "offset": offset,
+            "limit": limit,
+            "changes": changes_data,
+        }
+
+        # Add student info if filtering by regno
+        if regno:
+            response_content["filtered_by_regno"] = regno
+            if changes_data:  # If we have data, we know student exists
+                response_content["student_name"] = changes_data[0]["student_name"]
 
         return JSONResponse(
             status_code=200,
-            content={
-                "success": True,
-                "total_changes": total_changes,
-                "showing": len(changes_data),
-                "offset": offset,
-                "limit": limit,
-                "changes": changes_data,
-            },
+            content=response_content,
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         return JSONResponse(
             status_code=500,
@@ -184,58 +216,48 @@ async def get_all_grade_changes(
         )
 
 
-@router.get("/grade-changes/{regno}")
-async def get_grade_changes(regno: str, db: Session = Depends(get_db), limit: int = 50):
-    """Get grade changes for a specific student (most recent first)"""
-    try:
-        # Verify student exists
-        student = db.query(Student).filter(Student.regno == regno).first()
-        if not student:
-            raise HTTPException(status_code=404, detail="Student not found")
+@router.get("/student-logs")
+async def student_logs_data(request: Request, db: Session = Depends(get_db)):
+    """API endpoint for student logs data"""
+    if not is_admin_authenticated(request):
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
 
-        # Get grade changes for this student
-        grade_changes = (
-            db.query(GradeChange)
-            .filter(GradeChange.regno == regno)
-            .order_by(GradeChange.changed_at.desc())
-            .limit(limit)
+    try:
+        # Get recent student login logs (last 100)
+        student_logs = (
+            db.query(StudentLoginLog)
+            .order_by(desc(StudentLoginLog.login_time))
+            .limit(100)
             .all()
         )
 
-        # Format the response
-        changes_data = []
-        for change in grade_changes:
-            changes_data.append(
+        # Calculate statistics
+        total_logins = len(student_logs)
+        unique_students = len(set(log.regno for log in student_logs))
+
+        # Format logs for frontend
+        formatted_logs = []
+        for log in student_logs:
+
+            formatted_logs.append(
                 {
-                    "id": change.id,
-                    "regno": change.regno,
-                    "student_name": student.name,
-                    "subject_code": change.subject_code,
-                    "semester": change.semester,
-                    "original_grade": change.original_grade,
-                    "new_grade": change.new_grade,
-                    "credits": change.credits,
-                    "changed_at": change.changed_at.isoformat(),
-                    "grade_difference": f"{change.original_grade} → {change.new_grade}",
+                    "name": log.student_name,
+                    "regno": log.regno,
+                    "login_time": log.login_time.isoformat(),
+                    "ip_address": log.ip_address,
+                    "user_agent": log.user_agent,
                 }
             )
 
         return JSONResponse(
-            status_code=200,
-            content={
-                "success": True,
-                "student_regno": regno,
-                "student_name": student.name,
-                "total_changes": len(changes_data),
-                "changes": changes_data,
-            },
+            {
+                "logs": formatted_logs,
+                "stats": {
+                    "total_logins": total_logins,
+                    "unique_students": unique_students,
+                },
+            }
         )
 
     except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "success": False,
-                "message": f"Failed to retrieve grade changes: {str(e)}",
-            },
-        )
+        return JSONResponse({"error": str(e)}, status_code=500)
