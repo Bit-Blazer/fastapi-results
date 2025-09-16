@@ -1,0 +1,36 @@
+name: Ping Supabase to Prevent Pausing
+
+on:
+  schedule:
+    - cron: '0 9 * * 1,4' # Runs at 9:00 AM UTC every Monday & Thursday
+  workflow_dispatch: # Lets you manually trigger the workflow if needed
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install @supabase/supabase-js
+
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          node -e "
+          const { createClient } = require('@supabase/supabase-js');
+          const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+          supabase.from('keepalive').select('id').limit(1)
+            .then(({ data, error }) => {
+              if (error) console.error(error);
+              else console.log('Ping successful:', data);
+            });
+          "
